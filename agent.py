@@ -1,5 +1,3 @@
-# c:\Users\kiko\Desktop\ai_agent_course\llmagent\agent.py
-
 import os
 from openai import OpenAI
 import json
@@ -47,57 +45,6 @@ def extract_entities_with_llm(user_text: str) -> dict:
         return {"platform": None, "user": None, "product": None}
 
 
-def get_social_media_data_from_user(platform: str, user: str) -> list[str]:
-    """
-    Prompts the user to enter social media posts.
-    """
-    posts = []
-    if platform and user:
-        print(f"\nPlease enter recent posts for {user} on {platform}. Enter an empty line to finish.")
-        while True:
-            post = input(f"Post [{len(posts) + 1}]: ")
-            if not post:
-                break
-            posts.append(post)
-    return posts
-
-
-def get_market_data_from_user(product: str) -> dict:
-    """
-    Prompts the user to enter market data for a specific product.
-    """
-    if not product:
-        return {}
-
-    print(f"\nPlease enter the market data for {product}.")
-    try:
-        high_3d_str = input("3-Day High: ")
-        high_3d = float(high_3d_str.replace(',', ''))
-        
-        low_3d_str = input("3-Day Low: ")
-        low_3d = float(low_3d_str.replace(',', ''))
-        
-        volume_3d_str = input("3-Day Volume: ")
-        volume_3d = int(volume_3d_str.replace(',', ''))
-        
-        rsi_14d_str = input("14-Day RSI: ")
-        rsi_14d = float(rsi_14d_str.replace(',', ''))
-        
-        news_summary = input("News Summary: ")
-
-        return {
-            "product": product,
-            "high_3d": high_3d,
-            "low_3d": low_3d,
-            "volume_3d": volume_3d,
-            "rsi_14d": rsi_14d,
-            "news_summary": news_summary
-        }
-    except ValueError:
-        print("Invalid input. Please enter numerical values for market data.")
-        return {}
-
-
 def generate_investment_suggestion_with_llm(entities: dict, social_media_info: list[str], market_data: dict) -> str:
     """
     Generates a final investment suggestion based on all gathered information.
@@ -137,63 +84,3 @@ def generate_investment_suggestion_with_llm(entities: dict, social_media_info: l
     )
     
     return response.choices[0].message.content
-
-
-def get_investment_suggestion(user_text: str) -> dict:
-    """
-    Main function to orchestrate the investment suggestion process.
-    """
-    # 1. Extract entities from user text
-    print("Step 1: Extracting entities from user text...")
-    entities = extract_entities_with_llm(user_text)
-    print(f"  -> Extracted: {entities}")
-
-    if not entities.get('product'):
-        return {
-            "suggestion": "I'm sorry, but I couldn't identify a specific investment product in your message. Please specify a product like BTC, ETH, or a stock ticker.",
-            "reasoning": {}
-        }
-
-    # 2. Get social media information
-    print("Step 2: Fetching social media information...")
-    social_media_info = get_social_media_data_from_user(entities.get('platform'), entities.get('user'))
-    print(f"  -> Fetched {len(social_media_info)} posts.")
-
-    # 3. Get market data
-    print("Step 3: Fetching market data...")
-    market_data = get_market_data_from_user(entities.get('product'))
-    if not market_data:
-        return {
-            "suggestion": "Could not proceed without market data. Please try again.",
-            "reasoning": {}
-        }
-    print(f"  -> Fetched data for {market_data.get('product')}")
-
-    # 4. Generate final suggestion
-    print("Step 4: Generating final investment suggestion...")
-    final_suggestion = generate_investment_suggestion_with_llm(entities, social_media_info, market_data)
-    print("  -> Suggestion generated.")
-
-    # Return the final suggestion and the reasoning data for the frontend
-    return {
-        "suggestion": final_suggestion,
-        "reasoning": {
-            "extracted_entities": entities,
-            "social_media_posts": social_media_info,
-            "market_data": market_data
-        }
-    }
-
-if __name__ == '__main__':
-    # Example usage:
-    # user_query = "What do you think about BTC? I saw Trump tweeted something about it on Twitter."
-    user_query = "I've been seeing a lot of buzz around Bitcoin lately. Donald Trump mentioned it on X recently. What's the latest on OKX for BTC?"
-    
-    result = get_investment_suggestion(user_query)
-
-    print("\n--- Final Result ---")
-    print("\n[Investment Suggestion]")
-    print(result['suggestion'])
-
-    print("\n[Reasoning Data for Frontend]")
-    print(json.dumps(result['reasoning'], indent=2))
