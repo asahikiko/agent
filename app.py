@@ -1,10 +1,6 @@
 import streamlit as st
-import sys
 import os
 import json
-
-# 将父目录添加到路径中以便导入 agent
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # 我们需要重构 agent.py，使其包含一个接收所有数据作为输入的函数
 # 假设 agent.py 中存在一个名为 `run_analysis` 的函数
