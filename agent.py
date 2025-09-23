@@ -1,6 +1,7 @@
 import os
 from openai import OpenAI
 import json
+import streamlit as st
 
 # 从环境变量或密钥管理系统加载API密钥是一个好习惯。
 # 在这个例子中，我们假设API密钥存储在环境变量中。
@@ -9,9 +10,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # 使用用户提供的Silicon Flow API配置
+# 从环境变量或Streamlit secrets中获取API密钥
+api_key = os.getenv("SILICONFLOW_API_KEY") or st.secrets.get("SILICONFLOW_API_KEY")
+if not api_key:
+    st.error("⚠️ 请配置 SILICONFLOW_API_KEY 环境变量或在 Streamlit Cloud 中设置 secrets")
+    st.stop()
 
 client = OpenAI(
-    api_key="sk-jwaoksrekpmepnwbqfoaiktmgtlyjevobxujnwgyfgthbjai",
+    api_key=api_key,
     base_url="https://api.siliconflow.cn/v1"
 )
 
